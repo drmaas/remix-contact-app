@@ -233,6 +233,20 @@ i {
   background: #e3e3e3;
 }
 
+#sidebar nav button {
+  width: 15%;
+  float:left;
+}
+
+#sidebar nav button:hover {
+  color: #eeb004;
+}
+
+#sidebar nav a {
+  width: 85%;
+  float:left;
+}
+
 #sidebar nav a.active {
   background: hsl(224, 98%, 58%);
   color: white;

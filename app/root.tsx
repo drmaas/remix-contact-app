@@ -1,5 +1,9 @@
 import { json, redirect } from '@remix-run/node';
-import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
+import type {
+    ActionFunctionArgs,
+    LinksFunction,
+    LoaderFunctionArgs,
+} from '@remix-run/node';
 import {
     Form,
     Links,
@@ -13,12 +17,26 @@ import {
     useSubmit,
 } from '@remix-run/react';
 import appStylesHref from './app.css?url';
-import { createEmptyContact, getContacts } from './data';
+import { createEmptyContact, getContacts, updateContact } from './data';
 import { useEffect } from 'react';
+import Favorite from './components/favorites';
+import invariant from 'tiny-invariant';
 
-export const action = async () => {
-    const contact = await createEmptyContact();
-    return redirect(`/contacts/${contact.id}/edit`);
+export const action = async ({ request }: ActionFunctionArgs) => {
+    const formData = await request.formData();
+    const contactId = formData.get('contactId')?.toString();
+    const favorite = formData.get('favorite');
+
+    // hacking to allow updating favorite from sidenav
+    if (favorite) {
+        invariant(contactId, 'Missing contactId param');
+        return updateContact(contactId, {
+            favorite: favorite === 'true',
+        });
+    } else {
+        const contact = await createEmptyContact();
+        return redirect(`/contacts/${contact.id}/edit`);
+    }
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -94,6 +112,7 @@ export default function App() {
                             <ul>
                                 {contacts.map((contact) => (
                                     <li key={contact.id}>
+                                        <div style={{}}>
                                         <NavLink
                                             className={({
                                                 isActive,
@@ -115,10 +134,9 @@ export default function App() {
                                             ) : (
                                                 <i>No Name</i>
                                             )}{' '}
-                                            {contact.favorite ? (
-                                                <span>★</span>
-                                            ) : null}
                                         </NavLink>
+                                        <Favorite contact={contact} />
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
